@@ -10,10 +10,10 @@ class MyWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("Python GUI Test")
-        self.setGeometry(150, 150, 325, 250)
+        self.setGeometry(150, 150, 315, 250)
 
         self.setStyleSheet("QWidget { background-color: black; }"
-                           "QPushButton { background-color: #8F00FF; color: white; border: none; padding: 10px; font-size: 14px; }"
+                           "QPushButton { background-color: #8F00FF; color: white; border: none; padding: 10px; font-size: 14px; border-radius: 5px; }"
                            "QPushButton:hover { background-color: #6F2DA8; }") 
 
         self.init_ui()
