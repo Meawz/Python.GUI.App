@@ -1,83 +1,84 @@
-import os
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QMessageBox, QLineEdit, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QPushButton, QFileDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QFormLayout
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 import PyPDF2
 
-class NewWindow(QWidget):
-    def __init__(self, parent):
+class NewContractWindow(QWidget):
+    def __init__(self):
         super().__init__()
 
-        self.parent = parent
-
-        self.setWindowTitle("New Window")
-        self.setGeometry(300, 300, 315, 250)
+        self.setWindowTitle("New Contract")
+        self.setGeometry(0, 0, 500, 500)
 
         self.setStyleSheet("QWidget { background-color: black; border: 2px solid black; border-radius: 8px; }"
                            "QPushButton { background-color: #8F00FF; color: white; border: 2px solid #6F2DA8; padding: 10px; font-size: 14px; border-radius: 5px; }"
-                           "QPushButton:hover { background-color: #6F2DA8; }")
+                           "QPushButton:hover { background-color: #6F2DA8; }"
+                           "QLabel { color: white; }"
+                           "QLineEdit { background-color: white; border: 2px solid #6F2DA8; padding: 10px; border-radius: 5px; }")
 
-        self.name_input = QLineEdit(self)
-        self.name_input.setPlaceholderText("Enter your name")
-        self.name_input.setStyleSheet("background-color: #FFFFCC; border: 2px solid #FF9900; padding: 5px;")
+        label_nume = QLabel("Nume:")
+        label_prenume = QLabel("Prenume:")
+        label_cnp = QLabel("CNP:")
 
-        self.email_input = QLineEdit(self)
-        self.email_input.setPlaceholderText("Enter your email")
-        self.email_input.setStyleSheet("background-color: #FFFFCC; border: 2px solid #FF9900; padding: 5px;")
+        self.lineedit_nume = QLineEdit(self)
+        self.lineedit_prenume = QLineEdit(self)
+        self.lineedit_cnp = QLineEdit(self)
 
-        back_button = QPushButton("Back", self)
-        back_button.clicked.connect(self.go_back)
-        back_button.setGeometry(30, 70, 120, 50)
+        self.lineedit_nume.setMaximumWidth(150)
+        self.lineedit_prenume.setMaximumWidth(150)
+        self.lineedit_cnp.setMaximumWidth(150)
 
-        exit_button = QPushButton("Exit", self)
-        exit_button.clicked.connect(self.close)
-        exit_button.setGeometry(160, 70, 120, 50)
+        confirm_button = QPushButton("Confirm", self)
+        confirm_button.clicked.connect(self.show_confirmation_message)
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.name_input)
-        layout.addWidget(self.email_input)
-        layout.addWidget(back_button)
-        layout.addWidget(exit_button)
+        layout = QFormLayout(self)
+        layout.addRow(label_nume, self.lineedit_nume)
+        layout.addRow(label_prenume, self.lineedit_prenume)
+        layout.addRow(label_cnp, self.lineedit_cnp)
 
         self.setLayout(layout)
-        
 
-    def go_back(self):
-        self.close()
-        self.parent.show()
+    def show_confirmation_message(self):
+        QMessageBox.information(self, "Confirmation", "You added a new contract!")
 
 class MyWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.new_window = None
-
         self.setWindowTitle("Python GUI Test")
-        self.setGeometry(150, 150, 315, 250)
-
+        self.setGeometry(0, 0, 500, 500)
 
         self.setStyleSheet("QWidget { background-color: black; border: 2px solid black; border-radius: 8px; }"
                            "QPushButton { background-color: #8F00FF; color: white; border: 2px solid #6F2DA8; padding: 10px; font-size: 14px; border-radius: 5px; }"
-                           "QPushButton:hover { background-color: #6F2DA8; }") 
+                           "QPushButton:hover { background-color: #6F2DA8; }")
 
         self.init_ui()
-    
+
     def init_ui(self):
         merge_button = QPushButton("Merge PDFs", self)
         merge_button.clicked.connect(self.show_file_dialog)
-        merge_button.setGeometry(30, 70, 120, 50)
+
+        new_contract_button = QPushButton("New Contract", self)
+        new_contract_button.clicked.connect(self.open_new_contract_window)
 
         exit_button = QPushButton("Exit", self)
         exit_button.clicked.connect(self.close)
-        exit_button.setGeometry(160, 70, 120, 50)
-
-        new_window_button = QPushButton("Open New Window", self)
-        new_window_button.clicked.connect(self.open_new_window)
-        new_window_button.setGeometry(30, 130, 250, 50)
-
+        
         font = QFont()
         font.setPointSize(12)
+
         merge_button.setFont(font)
+        new_contract_button.setFont(font)
         exit_button.setFont(font)
+        
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(merge_button)
+        button_layout.addWidget(new_contract_button)
+        button_layout.addWidget(exit_button)
+
+        layout = QVBoxLayout(self)
+        layout.addLayout(button_layout)
+        self.setLayout(layout)
 
     def show_file_dialog(self):
         options = QFileDialog.Options()
@@ -95,25 +96,24 @@ class MyWindow(QWidget):
 
     def merge_pdfs(self, pdf_files):
         if pdf_files:
-           merger = PyPDF2.PdfMerger()
-           for file in pdf_files:
-               merger.append(file)
+            merger = PyPDF2.PdfMerger()
+            for file in pdf_files:
+                merger.append(file)
 
-           output_file = QFileDialog.getSaveFileName(self, "Save merged PDF", filter="PDF Files (*.pdf)")
-           if output_file[0]:
-               with open(output_file[0], "wb") as merged_pdf:
-                   merger.write(merged_pdf)
-                
-               QMessageBox.information(self, "Success", "PDFs merged successfully!")
-           else:
-               QMessageBox.warning(self, "Error", "Invalid output file name.")
+            output_file = QFileDialog.getSaveFileName(self, "Save merged PDF", filter="PDF Files (*.pdf)")
+            if output_file[0]:
+                with open(output_file[0], "wb") as merged_pdf:
+                    merger.write(merged_pdf)
+
+                QMessageBox.information(self, "Success", "PDFs merged successfully!")
+            else:
+                QMessageBox.warning(self, "Error", "Invalid output file name.")
         else:
             QMessageBox.warning(self, "No PDFs", "No PDF files selected.")
     
-    def open_new_window(self):
-        self.new_window = NewWindow(self)
-        self.new_window.show()
-        self.close()
+    def open_new_contract_window(self):
+        self.new_contract_window = NewContractWindow()
+        self.new_contract_window.show()
 
 if __name__ == "__main__":
     app = QApplication([])
